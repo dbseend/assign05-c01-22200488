@@ -3,6 +3,7 @@ package com.webservice.week05.controller;
 import com.webservice.week05.dto.MovieRequest;
 import com.webservice.week05.dto.MovieResponse;
 import com.webservice.week05.service.MovieService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,7 @@ public class MovieController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public MovieResponse create(@RequestBody MovieRequest request) {
+    public MovieResponse create(@Valid @RequestBody MovieRequest request) {
         return movieService.create(request);
     }
 
@@ -34,7 +35,7 @@ public class MovieController {
     }
 
     @PutMapping("/{id}")
-    public MovieResponse update(@PathVariable Long id, @RequestBody MovieRequest request) {
+    public MovieResponse update(@PathVariable Long id, @Valid @RequestBody MovieRequest request) {
         return movieService.update(id, request);
     }
 

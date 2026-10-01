@@ -30,8 +30,11 @@ public class MovieService {
         return MovieResponse.from(repository.save(movie));
     }
 
-    public List<MovieResponse> findAll() {
+    /** genre가 비어 있으면 전체, 아니면 장르가 일치하는 영화만 반환 (대소문자 무시). */
+    public List<MovieResponse> findAll(String genre) {
         return repository.findAll().stream()
+                .filter(movie -> genre == null || genre.isBlank()
+                        || movie.getGenre().equalsIgnoreCase(genre.trim()))
                 .map(MovieResponse::from)
                 .toList();
     }

@@ -25,8 +25,8 @@ public class MovieController {
     }
 
     @GetMapping
-    public List<MovieResponse> findAll() {
-        return movieService.findAll();
+    public List<MovieResponse> findAll(@RequestParam(required = false) String genre) {
+        return movieService.findAll(genre);
     }
 
     @GetMapping("/{id}")

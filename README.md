@@ -46,33 +46,30 @@ HTTP Request → Controller → Service → Repository (Interface) → MemoryRep
 ├── .dockerignore
 ├── build.gradle
 └── src/
-    ├── main/
-    │   ├── java/com/webservice/week05/
-    │   │   ├── Week05MovieCrudApplication.java  # Spring Boot 실행 메인 클래스
-    │   │   ├── controller/
-    │   │   │   └── MovieController.java         # REST Controller, @Valid
-    │   │   ├── domain/
-    │   │   │   └── Movie.java                   # 도메인 Entity
-    │   │   ├── dto/
-    │   │   │   ├── MovieRequest.java            # 요청 DTO (record) + Bean Validation
-    │   │   │   └── MovieResponse.java           # 응답 DTO (record)
-    │   │   ├── exception/
-    │   │   │   └── GlobalExceptionHandler.java  # 400 응답 처리
-    │   │   ├── repository/
-    │   │   │   ├── MovieRepository.java         # Repository Interface
-    │   │   │   └── MemoryMovieRepository.java   # List 기반 메모리 저장소, ID 자동 생성
-    │   │   └── service/
-    │   │       └── MovieService.java            # 비즈니스 로직, 404, 장르 필터
-    │   └── resources/
-    │       └── application.properties           # server.port=${PORT:8080}
-    └── test/java/com/webservice/week05/
-        └── MovieApiTest.java                    # CRUD / 404 / 400 / 장르 필터 테스트
+    └── main/
+        ├── java/com/webservice/week05/
+        │   ├── Week05MovieCrudApplication.java  # Spring Boot 실행 메인 클래스
+        │   ├── controller/
+        │   │   └── MovieController.java         # REST Controller, @Valid
+        │   ├── domain/
+        │   │   └── Movie.java                   # 도메인 Entity
+        │   ├── dto/
+        │   │   ├── MovieRequest.java            # 요청 DTO (record) + Bean Validation
+        │   │   └── MovieResponse.java           # 응답 DTO (record)
+        │   ├── exception/
+        │   │   └── GlobalExceptionHandler.java  # 400 응답 처리
+        │   ├── repository/
+        │   │   ├── MovieRepository.java         # Repository Interface
+        │   │   └── MemoryMovieRepository.java   # List 기반 메모리 저장소, ID 자동 생성
+        │   └── service/
+        │       └── MovieService.java            # 비즈니스 로직, 404, 장르 필터
+        └── resources/
+            └── application.properties           # server.port=${PORT:8080}
 ```
 
 #### 로컬 실행
 ```bash
 ./gradlew bootRun     # http://localhost:8080
-./gradlew test
 ```
 
 ---
@@ -133,7 +130,6 @@ HTTP Request → Controller → Service → Repository (Interface) → MemoryRep
 | :--- | :--- |
 | `spring-boot-starter-web` | REST Controller, JSON 변환, 내장 Tomcat |
 | `spring-boot-starter-validation` | `@NotBlank`, `@DecimalMin` 등 입력 검증 (STEP 5-A, 400 처리) |
-| `spring-boot-starter-test` | MockMvc 기반 API 테스트 |
 
 ---
 
@@ -163,7 +159,7 @@ HTTP Request → Controller → Service → Repository (Interface) → MemoryRep
 
 ## ④ 개발 과정 요약
 
-단계마다 커밋하며 진행했다 (총 14커밋 이상, 커밋 메시지는 `feat:`, `test:`, `build:`, `docs:` 규칙 사용).
+단계마다 커밋하며 진행했다 (총 14커밋 이상, 커밋 메시지는 `feat:`, `build:`, `docs:` 규칙 사용).
 
 | 단계 | 내용 | 주요 커밋 |
 | :--- | :--- | :--- |
@@ -171,7 +167,7 @@ HTTP Request → Controller → Service → Repository (Interface) → MemoryRep
 | 2 | `Movie` 도메인, `MovieRequest`/`MovieResponse` DTO (record + `from()`) | `feat: Movie 도메인 객체 추가`, `feat: ... DTO 추가` |
 | 3 | `MovieRepository` 인터페이스, `MemoryMovieRepository` (List, ID 자동 생성) | `feat: MemoryMovieRepository 구현` |
 | 4 | `MovieService`(404 처리), `MovieController`(CRUD, 201/204) | `feat: MovieService CRUD 및 404 처리` |
-| 5 | 입력 검증(400), 장르 필터, `MovieApiTest`, Dockerfile, README | `feat: 잘못된 입력 400 처리`, `feat: 장르별 필터 조회`, `build: Dockerfile 추가` |
+| 5 | 입력 검증(400), 장르 필터, Dockerfile, README | `feat: 잘못된 입력 400 처리`, `feat: 장르별 필터 조회`, `build: Dockerfile 추가` |
 
 ---
 
@@ -189,7 +185,7 @@ HTTP Request → Controller → Service → Repository (Interface) → MemoryRep
 {"status":400,"error":"Bad Request","errors":{"runningTime":"runningTime은 1분 이상이어야 합니다.","title":"title은 비어 있을 수 없습니다.","rating":"rating은 10.0 이하여야 합니다."}}
 ```
 
-> **ToDo**: 400 응답 curl 캡처 이미지 첨부
+> **ToDo**: Postman 캡처 첨부 — `POST /api/movies`, Body(raw JSON)에 잘못된 값 입력 후 400 응답 화면
 
 ### B. 장르 필터 조회
 - **이유**: 전체 목록에서 장르별로 좁혀 보기 위함
@@ -202,31 +198,30 @@ HTTP Request → Controller → Service → Repository (Interface) → MemoryRep
 [{"id":1,"title":"Interstellar","director":"Christopher Nolan","genre":"SF","releaseYear":2014,"rating":8.7,"runningTime":169}]
 ```
 
-> **ToDo**: 장르 필터 curl 캡처 이미지 첨부
+> **ToDo**: Postman 캡처 첨부 — `GET /api/movies?genre=sf` 요청과 200 응답 화면
 
 ---
 
 ## ⑥ 배포 과정 요약
 
 ### 1) 추가·수정한 파일
-- `Dockerfile`: 멀티 스테이지 (JDK 17에서 `./gradlew clean build`(테스트 포함) → JRE 17에서 jar 실행)
+- `Dockerfile`: 멀티 스테이지 (JDK 17에서 `./gradlew clean build` → JRE 17에서 jar 실행)
 - `.dockerignore`: 빌드 산출물, IDE 설정 제외
 - `application.properties`: `server.port=${PORT:8080}` (Render가 주입하는 `PORT` 사용)
 
 ### 2) 배포 순서
 1. 개인 GitHub 레포(Public) 생성 후 `git remote add deploy ...`, `git push -u deploy main`
 2. Render에서 Web Service 생성: Runtime `Docker`, Branch `main`, Region Singapore, Plan Free
-3. Render가 `Dockerfile`로 빌드(테스트 포함) 후 배포
-4. 배포 URL로 CRUD, 404, 400, 장르 필터 호출 확인
-
-> **ToDo**: Render 대시보드 배포 성공(Live) 화면 캡처 첨부
+3. Render가 `Dockerfile`로 빌드 후 배포
+4. 배포 URL로 Postman에서 CRUD, 404, 400, 장르 필터 요청 확인
+![스크린샷 2026-10-02 오후 7.03.26.png](../../../../../../../../var/folders/hb/3hzdklw95yn1ztqq6wb9l0g00000gn/T/TemporaryItems/NSIRD_screencaptureui_ZBzIp8/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202026-10-02%20%EC%98%A4%ED%9B%84%207.03.26.png)
 
 ### 3) 문제와 해결
-- 배포 중 오류는 없었다. 로컬 JDK 17에서 `./gradlew test` 통과 후 같은 Dockerfile로 배포해서 첫 배포에 성공했다.
+- 배포 중 오류는 없었다. 로컬에서 `./gradlew bootRun`으로 동작을 확인한 뒤 같은 Dockerfile로 배포해서 첫 배포에 성공했다.
 - Free 플랜은 일정 시간 요청이 없으면 슬립하므로 첫 요청이 느릴 수 있다.
 - 메모리 저장소라서 서버가 재시작되면 데이터가 초기화된다. (과제 범위상 의도된 동작)
 
-### 4) 배포 URL 요청·응답 (curl 실제 테스트 결과)
+### 4) 배포 URL 요청·응답 (Postman 실제 테스트 결과)
 
 Base URL: `https://assign05-movie-api.onrender.com`
 
@@ -243,22 +238,22 @@ Base URL: `https://assign05-movie-api.onrender.com`
 | `POST /api/movies` (잘못된 입력) | 400 | 필드별 오류 메시지 |
 
 #### ① 데이터 등록 (POST)
-> **ToDo**: 캡처 이미지 첨부
+> **ToDo**: Postman 캡처 — `POST /api/movies`, Body(raw JSON), 201 응답
 
 #### ② 전체 목록 조회 (GET)
-> **ToDo**: 캡처 이미지 첨부
+> **ToDo**: Postman 캡처 — `GET /api/movies`, 200 응답
 
 #### ③ 단건 조회 (GET /{id})
-> **ToDo**: 캡처 이미지 첨부
+> **ToDo**: Postman 캡처 — `GET /api/movies/1`, 200 응답
 
 #### ④ 데이터 수정 (PUT /{id})
-> **ToDo**: 캡처 이미지 첨부
+> **ToDo**: Postman 캡처 — `PUT /api/movies/1`, Body(raw JSON), 200 응답
 
 #### ⑤ 데이터 삭제 (DELETE /{id}) 및 삭제된 ID 조회 시 404 확인
-> **ToDo**: 캡처 이미지 첨부
+> **ToDo**: Postman 캡처 — `DELETE /api/movies/2`(204), 이어서 `GET /api/movies/2`(404)
 
 #### ⑥ 잘못된 입력 400, 장르 필터
-> **ToDo**: 캡처 이미지 첨부 (⑤-A, ⑤-B와 동일 캡처 사용 가능)
+> ⑤-A, ⑤-B의 Postman 캡처로 대체
 
 ---
 
@@ -293,10 +288,10 @@ Base URL: `https://assign05-movie-api.onrender.com`
 ---
 
 ### 2) Problem & Solution (구현 중 발생한 문제와 해결 방법 1가지)
-- **문제점**: 테스트가 저장소의 ID 증가 값(`sequence`)을 공유해서, 테스트 실행 순서에 따라 `GET /api/movies/1` 같은 검증이 실패할 수 있었다.
-- **해결 방법**: `@DirtiesContext(AFTER_EACH_TEST_METHOD)`로 테스트마다 컨텍스트를 초기화해 ID 순서 의존을 제거했다. (커밋 `test: 테스트마다 컨텍스트 초기화`)
+- **문제점**: `rating`에 문자열을 보내는 것처럼 타입이 맞지 않거나 JSON 형식이 깨진 요청은 `@Valid` 검증 단계까지 가지 못해, 검증 실패(`errors` 필드)와 다른 형태의 기본 에러 응답이 내려갔다.
+- **해결 방법**: `GlobalExceptionHandler`에 `HttpMessageNotReadableException` 핸들러를 추가해 같은 400 응답 형식(`status`, `error`, `message`)으로 통일했다.
 
-> **ToDo**: 실제로 겪은 문제가 다르면 교체
+> **ToDo**: 위는 코드 기준 초안입니다. 실제로 겪은 문제(예: Postman 요청 오류, 배포 오류 등)로 교체하세요.
 
 ---
 

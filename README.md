@@ -213,7 +213,7 @@ HTTP Request → Controller → Service → Repository (Interface) → MemoryRep
 3. Render가 `Dockerfile`로 빌드 후 배포
 4. 배포 URL로 Postman에서 CRUD, 404, 400, 장르 필터 요청 확인
 
-> **ToDo**: Render 대시보드의 배포 성공(Live) 화면 캡처 첨부
+![Render 배포 성공 화면](images/06-render-live.png)
 
 ### 3) 문제와 해결
 - 배포 중 오류는 없었다. 로컬에서 `./gradlew bootRun`으로 동작을 확인한 뒤 같은 Dockerfile로 배포해서 첫 배포에 성공했다.
@@ -292,8 +292,8 @@ Base URL: `https://assign05-movie-api.onrender.com`
 ---
 
 ### 2) Problem & Solution (구현 중 발생한 문제와 해결 방법 1가지)
-- **문제점**: `rating`에 문자열을 보내는 것처럼 타입이 맞지 않거나 JSON 형식이 깨진 요청은 `@Valid` 검증 단계까지 가지 못해, 검증 실패(`errors` 필드)와 다른 형태의 기본 에러 응답이 내려갔다.
-- **해결 방법**: `GlobalExceptionHandler`에 `HttpMessageNotReadableException` 핸들러를 추가해 같은 400 응답 형식(`status`, `error`, `message`)으로 통일했다.
+- **문제점**: 예외 처리 관련 코드를 작성해 본 경험이 많지 않아, `@RestControllerAdvice`와 `@ExceptionHandler`의 기본 문법과 응답 형식(상태 코드, 오류 메시지 구성)을 잡는 데 어려움을 겪었다.
+- **해결 방법**: 관련 개념과 문법을 공부한 뒤 `GlobalExceptionHandler`를 작성했다. 검증 실패(`MethodArgumentNotValidException`)는 필드별 메시지를 담은 400 응답으로, JSON 형식 오류(`HttpMessageNotReadableException`)는 같은 400 형식의 응답으로 통일했다.
 
 ---
 

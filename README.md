@@ -6,8 +6,6 @@
 | GitHub (Personal) | https://github.com/dbseend/assign05-c01-22200488 |
 | 배포 URL (Render) | https://assign05-movie-api.onrender.com/api/movies |
 
-> 표시된 **ToDo**는 직접 작성하거나 캡처를 넣어야 하는 부분입니다. 제출 전 모두 채우고 이 안내문은 삭제하세요.
-
 ---
 
 ## ① 프로젝트 소개
@@ -177,28 +175,28 @@ HTTP Request → Controller → Service → Repository (Interface) → MemoryRep
 - **이유**: 빈 제목, 범위를 벗어난 평점, 0분 이하 상영 시간 같은 값이 저장되는 것을 막기 위함
 - **수정 파일**: `MovieRequest`(Bean Validation 어노테이션), `MovieController`(`@Valid`), `GlobalExceptionHandler`(400 응답 형식 통일)
 - **처리 범위**: 검증 실패(`MethodArgumentNotValidException`), JSON 형식/타입 오류(`HttpMessageNotReadableException`) 모두 400
-- **테스트 요청**: `POST /api/movies` 에 `title=""`, `rating=11`, `runningTime=0`
-- **예상 결과**: 400 Bad Request + 필드별 오류 메시지
+- **테스트 요청**: `POST /api/movies` 에 `rating`을 범위(0.0 ~ 10.0)를 넘는 `100`으로 전송
+- **예상 결과**: 400 Bad Request + 필드별 오류 메시지 (`rating`)
 - **실제 결과 (배포 서버, 400)**:
 
 ```json
-{"status":400,"error":"Bad Request","errors":{"runningTime":"runningTime은 1분 이상이어야 합니다.","title":"title은 비어 있을 수 없습니다.","rating":"rating은 10.0 이하여야 합니다."}}
+{"status":400,"error":"Bad Request","errors":{"rating":"rating은 10.0 이하여야 합니다."}}
 ```
 
-> **ToDo**: Postman 캡처 첨부 — `POST /api/movies`, Body(raw JSON)에 잘못된 값 입력 후 400 응답 화면
+![400 응답](images/05a-invalid-400.png)
 
 ### B. 장르 필터 조회
 - **이유**: 전체 목록에서 장르별로 좁혀 보기 위함
 - **수정 파일**: `MovieController.findAll(@RequestParam(required = false) String genre)`, `MovieService.findAll(genre)` (대소문자 무시, 값이 없으면 전체 반환)
-- **테스트 요청**: `GET /api/movies?genre=sf` (Interstellar(SF), Parasite(Thriller) 등록 상태)
-- **예상 결과**: 장르가 SF인 영화만 조회
+- **테스트 요청**: `GET /api/movies?genre=드라마` (오디세이(어드벤쳐), 기생충(드라마), 어벤져스: 엔드게임(히어로)이 등록된 상태)
+- **예상 결과**: 장르가 `드라마`인 영화만 조회
 - **실제 결과 (배포 서버, 200)**:
 
 ```json
-[{"id":1,"title":"Interstellar","director":"Christopher Nolan","genre":"SF","releaseYear":2014,"rating":8.7,"runningTime":169}]
+[{"id":3,"title":"기생충","director":"봉준호","genre":"드라마","releaseYear":2019,"rating":9.0,"runningTime":150}]
 ```
 
-> **ToDo**: Postman 캡처 첨부 — `GET /api/movies?genre=sf` 요청과 200 응답 화면
+![장르 필터 응답](images/05b-genre-filter.png)
 
 ---
 
@@ -214,7 +212,8 @@ HTTP Request → Controller → Service → Repository (Interface) → MemoryRep
 2. Render에서 Web Service 생성: Runtime `Docker`, Branch `main`, Region Singapore, Plan Free
 3. Render가 `Dockerfile`로 빌드 후 배포
 4. 배포 URL로 Postman에서 CRUD, 404, 400, 장르 필터 요청 확인
-![스크린샷 2026-10-02 오후 7.03.26.png](../../../../../../../../var/folders/hb/3hzdklw95yn1ztqq6wb9l0g00000gn/T/TemporaryItems/NSIRD_screencaptureui_ZBzIp8/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202026-10-02%20%EC%98%A4%ED%9B%84%207.03.26.png)
+
+> **ToDo**: Render 대시보드의 배포 성공(Live) 화면 캡처 첨부
 
 ### 3) 문제와 해결
 - 배포 중 오류는 없었다. 로컬에서 `./gradlew bootRun`으로 동작을 확인한 뒤 같은 Dockerfile로 배포해서 첫 배포에 성공했다.
@@ -227,32 +226,39 @@ Base URL: `https://assign05-movie-api.onrender.com`
 
 | 요청 | 상태 | 응답 |
 | :--- | :--- | :--- |
-| `POST /api/movies` (Interstellar) | 201 | `{"id":1,"title":"Interstellar",...,"runningTime":169}` |
-| `POST /api/movies` (Parasite) | 201 | `{"id":2,"title":"Parasite",...,"runningTime":132}` |
-| `GET /api/movies` | 200 | 등록된 영화 배열 |
-| `GET /api/movies?genre=sf` | 200 | SF 영화만 |
-| `GET /api/movies/1` | 200 | 단건 |
-| `PUT /api/movies/1` (rating 9.0) | 200 | 수정된 영화 |
-| `DELETE /api/movies/2` | 204 | 본문 없음 |
-| `GET /api/movies/999` | 404 | `{"status":404,"error":"Not Found","path":"/api/movies/999"}` |
-| `POST /api/movies` (잘못된 입력) | 400 | 필드별 오류 메시지 |
+| `POST /api/movies` (어벤져스: 엔드게임, rating 10) | 201 | `{"id":4,"title":"어벤져스: 엔드게임",...,"rating":10.0,"runningTime":150}` |
+| `GET /api/movies` | 200 | 등록된 영화 배열 (id 1, 3, 4) |
+| `GET /api/movies?genre=드라마` | 200 | 장르가 `드라마`인 영화만 (id 3 기생충) |
+| `GET /api/movies/4` | 200 | 단건 조회 |
+| `PUT /api/movies/4` (스파이더맨: 브랜뉴데이로 수정) | 200 | `{"id":4,"title":"스파이더맨: 브랜뉴데이",...,"runningTime":123}` |
+| `DELETE /api/movies/3` | 204 | 본문 없음 |
+| `GET /api/movies/3` (삭제된 ID) | 404 | `{"timestamp":"...","status":404,"error":"Not Found","path":"/api/movies/3"}` |
+| `POST /api/movies` (rating 100) | 400 | `{"status":400,"error":"Bad Request","errors":{"rating":"rating은 10.0 이하여야 합니다."}}` |
 
-#### ① 데이터 등록 (POST)
-> **ToDo**: Postman 캡처 — `POST /api/movies`, Body(raw JSON), 201 응답
+#### ① 데이터 등록 (POST /api/movies)
 
-#### ② 전체 목록 조회 (GET)
-> **ToDo**: Postman 캡처 — `GET /api/movies`, 200 응답
+![POST 등록](images/07-1-post.png)
 
-#### ③ 단건 조회 (GET /{id})
-> **ToDo**: Postman 캡처 — `GET /api/movies/1`, 200 응답
+#### ② 전체 목록 조회 (GET /api/movies)
 
-#### ④ 데이터 수정 (PUT /{id})
-> **ToDo**: Postman 캡처 — `PUT /api/movies/1`, Body(raw JSON), 200 응답
+![GET 전체 조회 200](images/07-2-get-all.png)
 
-#### ⑤ 데이터 삭제 (DELETE /{id}) 및 삭제된 ID 조회 시 404 확인
-> **ToDo**: Postman 캡처 — `DELETE /api/movies/2`(204), 이어서 `GET /api/movies/2`(404)
+#### ③ 단건 조회 (GET /api/movies/{id})
+
+![GET 단건 조회 200](images/07-3-get-one.png)
+
+#### ④ 데이터 수정 (PUT /api/movies/{id})
+
+![PUT 수정 200](images/07-4-put.png)
+
+#### ⑤ 데이터 삭제 (DELETE /api/movies/{id}) 및 삭제된 ID 조회 시 404 확인
+
+![DELETE 삭제 204](images/07-5-delete.png)
+
+![삭제된 ID 조회 404](images/07-6-get-404.png)
 
 #### ⑥ 잘못된 입력 400, 장르 필터
+
 > ⑤-A, ⑤-B의 Postman 캡처로 대체
 
 ---
@@ -283,15 +289,11 @@ Base URL: `https://assign05-movie-api.onrender.com`
 2. **입력 검증**: Bean Validation(`@Valid` + `GlobalExceptionHandler`)으로 검증을 한곳에서 처리하고 400 응답 형식을 통일할 수 있다.
 3. **배포 환경 분리**: 멀티 스테이지 Dockerfile과 `PORT` 환경변수로 로컬과 Render에서 같은 코드를 그대로 실행할 수 있다.
 
-> **ToDo**: 본인이 실제로 배운 내용으로 수정 (위 3가지는 초안)
-
 ---
 
 ### 2) Problem & Solution (구현 중 발생한 문제와 해결 방법 1가지)
 - **문제점**: `rating`에 문자열을 보내는 것처럼 타입이 맞지 않거나 JSON 형식이 깨진 요청은 `@Valid` 검증 단계까지 가지 못해, 검증 실패(`errors` 필드)와 다른 형태의 기본 에러 응답이 내려갔다.
 - **해결 방법**: `GlobalExceptionHandler`에 `HttpMessageNotReadableException` 핸들러를 추가해 같은 400 응답 형식(`status`, `error`, `message`)으로 통일했다.
-
-> **ToDo**: 위는 코드 기준 초안입니다. 실제로 겪은 문제(예: Postman 요청 오류, 배포 오류 등)로 교체하세요.
 
 ---
 
@@ -312,19 +314,19 @@ public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotVal
 ```
 - **이유**: 검증 실패를 한곳에서 필드별 메시지가 담긴 400 응답으로 바꿔서, Controller에 검증 코드를 반복하지 않고 응답 형식을 통일하기 때문이다.
 
-> **ToDo**: 본인이 가장 중요하다고 생각하는 코드로 교체 가능
-
 ---
 
 ### 4) AI Usage
-> **ToDo**: 어떤 작업에 AI를 어떻게 활용했는지 직접 작성 (사용 도구, 활용한 단계, AI 결과를 어떻게 확인·수정했는지)
+- **사용 도구**: Claude
+- **활용 단계**: 프로젝트 구조 및 상세 내용 정리 후, 반복되는 코드 작성에 사용
+- **AI 결과 확인 및 수정**: 작성된 코드를 모두 직접 읽어보고, 필요한 부분은 직접 수정
 
 ---
 
 ### 5) Reflection
-> **ToDo**: 이번 과제를 하며 느낀 점, 다음에 해보고 싶은 것 작성 (예: DB(JPA) 연동으로 데이터 영속화)
+매주 단계별로 계속 발전시켜서, 학기가 끝났을 때 스스로 "내가 설계하고 만들었다"라고 말할 수 있는 프로젝트를 만들고 싶습니다.
 
 ---
 
 ### 6) 건의사항
-> **ToDo**: 없으면 "없음"
+없음
